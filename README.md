@@ -12,7 +12,7 @@ Run the following command to validate api deployment: `curl http://localhost`
 ## Cleanup
 Run the following command to dispose of created services: `terraform destroy`
 
-# k8s Local
+# K8s Local
 To deploy, run the following commands from the project root:
 - `cd k8s-local`
 - `kubectl apply -f .\deployment.yml`
