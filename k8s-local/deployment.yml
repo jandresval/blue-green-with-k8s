@@ -16,7 +16,7 @@ spec:
         - containerPort: 8080
         env:
           - name: PROVIDER
-            value: GruntWork
+            value: TestProvider
   selector:
     matchLabels:
       app: simple-webapp
