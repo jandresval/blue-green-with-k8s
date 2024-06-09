@@ -6,16 +6,21 @@ metadata:
 data:
   init.sql: |
     CREATE DATABASE IF NOT EXISTS blue_green;
+
     USE blue_green;
+
     CREATE TABLE IF NOT EXISTS greetings (
       id INT PRIMARY KEY NOT NULL AUTO_INCREMENT, 
       greeting VARCHAR(100)
     );
+
     INSERT INTO greetings (greeting) VALUES ('hello, hi, how are yah?');
+    
     CREATE TABLE IF NOT EXISTS farewells (
       id INT PRIMARY KEY NOT NULL AUTO_INCREMENT, 
       farewell VARCHAR(100)
     );
+    
     INSERT INTO farewells (farewell) VALUES ('adios, good bye, see yah?');
 ---
 # https://github.com/MariaDB/mariadb.org-tools/blob/master/anel/k8s/mariadb/mariadb-deployment-pvc.yaml
