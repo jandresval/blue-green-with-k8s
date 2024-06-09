@@ -16,6 +16,9 @@ Run the provided script to check the database status:
 ./check-db.sh
 ```
 
+## Local Database Connection
+
+For instructions on how to connect to the MariaDB database locally, please refer to the `check-db.sh` script. This script includes the necessary commands and steps for establishing a local connection.
 
 ## Verify Deployment (Detailed Method)
 Follow these steps for a detailed verification process:
