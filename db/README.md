@@ -1,16 +1,66 @@
-# Steps
+# Steps for MariaDB Deployment in Kubernetes
+
+## Deploy MariaDB
+```sh
+kubectl apply -f mariadb-deployment.yaml
+```
+
+# Remove Deployment Respource
+```sh
+kubectl delete -f mariadb-deployment.yaml
+```
+
+## Verify Deployment (Easy Method)
+Run the provided script to check the database status:
+```sh
+./check-db.sh
+```
 
 
-1. `kubectl apply -f mariadb-deployment.yaml`
-2. `kubectl get pods`
-3. `kubectl exec -it <REPLACE_WITH_POD_NAME. E.g. mariadb-deployment-XXXXX> -- /bin/sh`
-4. `mysql -u root -p` 
-    If received `/bin/sh: 1: mysql: not found`
-    3a. `apt-get update`
-    3b. `apt-get install mysql-client`
-        - Enter `y` on `Do you want to continue? [Y/n]`
-    3c. `mysql -u root -p`
-5. Enter `password` on `Enter password:`
-    4a. If failed, try again starting at step 3.
-6. `SELECT NOW();`
-7. `SHOW DATABASES;`
+## Verify Deployment (Detailed Method)
+Follow these steps for a detailed verification process:
+
+1. Check the pod status:
+    ```sh
+    kubectl get pods  # Wait until STATUS becomes Running otherwise investigate and troubleshoot.
+    ```
+2. Access the MariaDB pod:
+    ```sh
+    kubectl exec -it <REPLACE_WITH_POD_NAME> -- bash
+    ```
+    
+    >Example: 
+    >`kubectl exec -it mariadb-deployment-XXXXX -- bash`
+
+3. Try to connect to MariaDB: 
+    ```
+    mysql -u root -p
+    ```
+    >If you receive an error similar to following: `/bin/sh: 1: mysql: not found`, install the MySQL client:
+    >
+    >```sh
+    >apt-get update
+    >apt-get install mysql-client
+    >```
+    > Enter `y` when prompted: "Do you want to continue? [Y/n]"
+    >
+    > Run the following again:
+    >```sh
+    >mysql -u root -p
+    >```
+
+4. Enter the password when prompted:
+    ```
+    Enter password: password
+    ```
+    
+    >If the password fails, retry from step 3.
+
+5. Run SQL commands to test the connection:
+    ```sh
+    SELECT NOW(); # Should return the current server timestamp
+    ```
+
+    ```sh
+    SHOW DATABASEs; # Lists all databases
+    ```
