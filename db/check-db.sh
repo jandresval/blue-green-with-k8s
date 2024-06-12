@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Replace these variables with your actual database connection details
-HOST="localhost"
+HOST="127.0.0.1"
 PORT=30306
 USER="root"
 PASSWORD="password"
@@ -18,12 +18,12 @@ if [ $? -eq 0 ]; then
     if [ -z "$OUTPUT" ]; then
         echo "Query executed successfully, but no data was returned."
     else
-        echo "Query executed successfully. Output:"
+        echo $'Query executed successfully. Output:\n'
         echo "$OUTPUT"
     fi
 else
-    echo "Failed to execute query. Error:"
+    echo $'Failed to execute query. Error:\n'
     echo "$OUTPUT"
 fi
 
-read -rsp "Script end."
+read -rsp $'\nScript end.'
