@@ -188,3 +188,6 @@ $RECYCLE.BIN/
 .DS_Store
 
 _NCrunch*
+
+# IDEA config files
+.idea/
