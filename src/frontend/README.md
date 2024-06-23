@@ -31,4 +31,4 @@ export default {
 
 ## Add .env file
 
-- Add .env file and add a variable VITE_API_URL with the URI of the gretting endpoint that returns a string.
+- Add .env file and add a variable VITE_API_URL with the URI of the greeting endpoint that returns a string.

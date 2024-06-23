@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from "react";
-
+import { useState, useEffect } from "react";
 
 function Landing() {
 
@@ -13,13 +12,11 @@ function Landing() {
       }, []);
 
     return (
-        <>
-            <div className="flex justify-center bg-gray-100 h-screen items-center">
-                <div className="text-gray-800 text-center bg-gray-300 px-4 py-2 m-2">
-                    {data ? <pre>"{data}"</pre> : 'Loading...'}
-                </div>
+        <div className="flex justify-center bg-gray-100 h-screen items-center">
+            <div className="text-gray-800 text-center bg-gray-300 px-4 py-2 m-2">
+                {data ? <pre>"{data}"</pre> : 'Loading...'}
             </div>
-        </>
+        </div>
     );
 }
 
