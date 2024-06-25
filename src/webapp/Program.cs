@@ -35,7 +35,7 @@ var app = builder.Build();
 app.UseCors(myAllowSpecificOrigins);
 
 app.MapGet("/greeting", (GreetingRepository greetingRepository) =>
-    greetingRepository.GetGreeting()
+    greetingRepository.GetGreeting() //TODO: Return JSON
 ).RequireCors(myAllowSpecificOrigins);
 
 app.MapGet("/", () => "Hello World!");
