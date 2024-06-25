@@ -32,7 +32,7 @@ builder.Services.AddScoped<GreetingRepository>();
 
 var app = builder.Build();
 
-app.UseCors();
+app.UseCors(myAllowSpecificOrigins);
 
 app.MapGet("/greeting", (GreetingRepository greetingRepository) =>
     greetingRepository.GetGreeting()

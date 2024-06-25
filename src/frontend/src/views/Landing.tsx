@@ -4,7 +4,7 @@ function Landing() {
     const [data, setData] = useState(String);
     
     useEffect(() => {
-        fetch(import.meta.env.VITE_API_URL)
+        fetch(import.meta.env.VITE_API_URL_GREETING_ENDPOINT)
           .then((response) => response.text())
           .then((text) => setData(text))
           .catch((error) => {
