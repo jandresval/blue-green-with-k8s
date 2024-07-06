@@ -10,11 +10,9 @@ COPY . .
 WORKDIR "/src/src/webapp"
 RUN dotnet build "webapp.csproj" -c Release -o /app/build
 
-# Publish the application
 FROM build AS publish
 RUN dotnet publish "webapp.csproj" -c Release -o /app/publish
 
-# Build final image
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
