@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simple-webapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: simple-webapp
+  template:
+    metadata:
+      labels:
+        app: simple-webapp
+    spec:
+      containers:
+      - name: simple-webapp
+        image: simple-webapp:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8080
+        env:
+          - name: ASPNETCORE_ENVIRONMENT
+            value: "Production"
+          - name: Database__ConnectionString
+            value: "server=mariadb-service;port=3306;database=blue_green;user=root;password=password"
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: simple-webapp-service
+spec:
+  type: NodePort
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 30001
+  selector:
+    app: simple-webapp
