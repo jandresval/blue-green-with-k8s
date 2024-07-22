@@ -7,7 +7,7 @@ function Landing() {
         fetch(import.meta.env.VITE_API_URL_GREETING_ENDPOINT)
             .then((response) => response.text())
             .then((text) => setData(
-                JSON.parse(text)
+                text
             ))
             .catch((error) => {
                 console.error(error);
