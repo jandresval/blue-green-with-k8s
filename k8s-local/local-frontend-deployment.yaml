@@ -1,33 +1,32 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: simple-frontend
+  name: frontend
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: simple-frontend
+      app: frontend
   template:
     metadata:
       labels:
-        app: simple-frontend
+        app: frontend
     spec:
       containers:
-      - name: simple-frontend
-        image: frontend:latest
-        imagePullPolicy: Never
-        ports:
-        - containerPort: 3000
-        env:
-          - name: VITE_API_URL_GREETING_ENDPOINT
-            value: "http://localhost:30001/greeting"
+        - name: frontend
+          image: frontend:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3000
+          env:
+            - name: VITE_API_URL_GREETING_ENDPOINT
+              value: "http://localhost:30001/greeting"
 
 ---
-
 apiVersion: v1
 kind: Service
 metadata:
-  name: simple-frontend-service
+  name: frontend-service
 spec:
   type: NodePort
   ports:
@@ -35,4 +34,4 @@ spec:
       targetPort: 3000
       nodePort: 30002
   selector:
-    app: simple-frontend
+    app: frontend

@@ -7,9 +7,9 @@ To deploy services in your local Kubernetes environment, execute the following s
     kubectl apply -f ./db/mariadb-deployment.yaml
     ```
 
-2. Build and tag the Docker image:
+2. Build and tag the Frontend and Backend Docker images:
     ```
-    ./build-image.sh
+    .\build-images.sh
     ```
     >Ensure that the output shows `Build and tag completed`.
 
@@ -17,13 +17,6 @@ To deploy services in your local Kubernetes environment, execute the following s
     ```
     kubectl apply -f ./k8s-local/local-webapp-deployment.yaml
     ```
-
-3. Build and tag the Docker image for frontend:
-    ```
-    cd /src/frontend
-    ./build-image.sh
-    ```
-    >Ensure that the output show `Build and tag completed`.
 
 4. Deploy the frontend:
     ```
@@ -36,9 +29,9 @@ To deploy services in your local Kubernetes environment, execute the following s
     kubectl get deployments
     ```
     > You should see:
-    > - `mariadb-deployment`
-    > - `simple-frontend`
-    > - `simple-webapp`
+    > - `mariadb`
+    > - `frontend`
+    > - `webapp`
 
 ## Local Kubernetes Deployment Verification
 Confirm the API deployment by running: `curl http://localhost:30001/greeting`
