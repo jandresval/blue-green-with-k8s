@@ -18,20 +18,31 @@ To deploy services in your local Kubernetes environment, execute the following s
     kubectl apply -f ./k8s-local/local-webapp-deployment.yaml
     ```
 
-4. Verify the deployments:
+3. Build and tag the Docker image for frontend:
+    ```
+    cd /src/frontend
+    ./build-image.sh
+    ```
+    >Ensure that the output show `Build and tag completed`.
+
+4. Deploy the frontend:
+    ```
+    kubectl apply -f ./k8s-local/local-frontend-deployment.yaml
+    ```
+
+5. Verify the deployments:
 
     ```
     kubectl get deployments
     ```
     > You should see:
     > - `mariadb-deployment`
+    > - `simple-frontend`
     > - `simple-webapp`
-    
-5. Start the frontend by following the instructions provided in the [frontend README](./src/frontend/README.md).
 
 ## Local Kubernetes Deployment Verification
 Confirm the API deployment by running: `curl http://localhost:30001/greeting`
-Access the full application integration at: `http://localhost:5173`
+Access the full application integration at: `http://localhost:30002`
 
 ## Local Kubernetes Cleanup
 Run the following commands to dispose of created services: 
@@ -42,6 +53,10 @@ Run the following commands to dispose of created services:
 2. Delete the web application deployment:
     ``` 
     kubectl delete -f .\k8s-local\local-webapp-deployment.yaml
+    ```
+3. Delete the frontend deployment:
+    ```
+    kubectl delete -f .\k8s-local\local-frontend-deployment.yaml
     ```
 
 # K8s Terraform Deployment (DELETE)
