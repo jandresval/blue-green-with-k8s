@@ -1,6 +1,7 @@
 # blue-green-deployment
 
 # Local Kubernetes Deployment
+# Manual deploy
 To deploy services in your local Kubernetes environment, execute the following steps from the project root:
 1. Apply the MariaDB Kubernetes configuration:
     ```
@@ -50,6 +51,35 @@ Run the following commands to dispose of created services:
 3. Delete the frontend deployment:
     ```
     kubectl delete -f ./k8s-local/local-frontend-deployment.yaml
+    ```
+
+
+# Deploy all
+1. Deploy all
+   ```
+   .\release_app.sh
+   ```
+   
+   This deploy execute the following steps:
+   > Build both images `backend` and `frontend` and create a random tag on your docker
+   > Execute maria db deployment
+   > Execute `backend` deployment passing random tag to Kubernetes to use
+   > Execute `frontend` deployment passing random tag to kubernetes to use
+   > and display everything that was deploy into kubernetes
+
+after the deploy you should see:
+   > - `backend`
+   > - `frontend`
+   > - `mariadb`
+
+## Local Kubernetes Deployment Verification
+Confirm the API deployment by running: `curl http://localhost:30001/greeting`
+Access the full application integration at: `http://localhost:30002`
+
+# Undeploy all
+1. This script clean up kubernetes
+    ```
+    .\unrelease_app.sh
     ```
 
 # K8s Terraform Deployment (DELETE)
