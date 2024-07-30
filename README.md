@@ -35,8 +35,8 @@ To deploy services in your local Kubernetes environment, execute the following s
     > - `mariadb`
 
 ## Local Kubernetes Deployment Verification
-Confirm the API deployment by running: `curl http://localhost:30001/greeting`
-Access the full application integration at: `http://localhost:30002`
+Ckeck the API deployment: `curl http://localhost:30001/greeting`  
+Access the full application: `http://localhost:30002`
 
 ## Local Kubernetes Cleanup
 Run the following commands to dispose of created services: 
@@ -53,31 +53,30 @@ Run the following commands to dispose of created services:
     kubectl delete -f ./k8s-local/local-frontend-deployment.yaml
     ```
 
-
 # Deploy all
-1. Deploy all
+1. Run the eployment script:
    ```
    .\release_app.sh
    ```
    
-   This deploy execute the following steps:
-   > Build both images `backend` and `frontend` and create a random tag on your docker
-   > Execute maria db deployment
-   > Execute `backend` deployment passing random tag to Kubernetes to use
-   > Execute `frontend` deployment passing random tag to kubernetes to use
-   > and display everything that was deploy into kubernetes
+   This script performs the following steps:
+   > Builds `backend` and `frontend` Docker images with a random tag.  
+   > Deploys MariaDB.  
+   > Deploys the `backend` to Kubernetes with the random tag.  
+   > Deploys the `frontend` to Kubernetes with the random tag.  
+   > Displays the deployment status of all components.  
 
-after the deploy you should see:
+   after deployment, you should see:
    > - `backend`
    > - `frontend`
-   > - `mariadb`
+   > - `mariadb`  
 
 ## Local Kubernetes Deployment Verification
-Confirm the API deployment by running: `curl http://localhost:30001/greeting`
-Access the full application integration at: `http://localhost:30002`
+Check the API deployment: `curl http://localhost:30001/greeting`  
+Access the full application: `http://localhost:30002`  
 
 # Undeploy all
-1. This script clean up kubernetes
+1. Clean up Kubernetes by running:
     ```
     .\unrelease_app.sh
     ```
