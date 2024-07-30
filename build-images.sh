@@ -10,6 +10,10 @@ TAG="latest"
 # REGISTRY_URL="your-local-registry"
 
 # Build the Docker image
+if ! [[ $2 = "" ]]; then
+TAG=$2
+fi
+
 docker build -t ${BE_IMAGE_NAME}:${TAG} . --no-cache
 
 docker build -t ${FE_IMAGE_NAME}:${TAG} -f ./src/frontend/Dockerfile ./src/frontend --no-cache
@@ -22,4 +26,6 @@ docker build -t ${FE_IMAGE_NAME}:${TAG} -f ./src/frontend/Dockerfile ./src/front
 
 echo "Build and tag completed."
 
-read -rsp $'\nScript end.'
+if [[ "$1" = false ]] | [[ "$1" = "" ]]; then
+    read -rsp $'\nScript end.'
+fi
