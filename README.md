@@ -1,7 +1,7 @@
 # blue-green-deployment
 
 # Local Kubernetes Deployment
-# Manual deploy
+# Step By Step Manual Deployment
 To deploy services in your local Kubernetes environment, execute the following steps from the project root:
 1. Apply the MariaDB Kubernetes configuration:
     ```
@@ -53,7 +53,7 @@ Run the following commands to dispose of created services:
     kubectl delete -f ./k8s-local/local-frontend-deployment.yaml
     ```
 
-# Deploy all
+# Automated Script Deployment
 1. Run the eployment script:
    ```
    .\release_app.sh
