@@ -1,4 +1,4 @@
-﻿namespace webapp.Data.Repositories;
+﻿namespace Api.Data.Repositories;
 
 public class GreetingRepository
 (

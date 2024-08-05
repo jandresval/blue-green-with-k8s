@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# This sript is used for verifying the database deployment and health. Below are the default values for the database connection details.
+
 # Replace these variables with your actual database connection details
 HOST="127.0.0.1"
 PORT=30306
