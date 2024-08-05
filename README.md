@@ -56,7 +56,7 @@ Run the following commands to dispose of created services:
 # Automated Script Deployment
 1. Run the eployment script:
    ```
-   .\release_app.sh
+   .\deploy-app.sh
    ```
    
    This script performs the following steps:
@@ -78,7 +78,7 @@ Access the full application: `http://localhost:30002`
 # Undeploy all
 1. Clean up Kubernetes by running:
     ```
-    .\unrelease_app.sh
+    .\teardown-app.sh
     ```
 
 # K8s Terraform Deployment (DELETE)
