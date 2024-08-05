@@ -4,10 +4,9 @@ EXPOSE 8080
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY ["src/webapp/webapp.csproj", "src/webapp/"]
-RUN dotnet restore "src/webapp/webapp.csproj"
+COPY ["webapp.csproj", "./"]
+RUN dotnet restore "./webapp.csproj"
 COPY . .
-WORKDIR "/src/src/webapp"
 RUN dotnet build "webapp.csproj" -c Release -o /app/build
 
 FROM build AS publish
