@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: backend
+  name: b-g-backend
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: backend
+      app: b-g-backend
   template:
     metadata:
       labels:
-        app: backend
+        app: b-g-backend
     spec:
       containers:
-        - name: backend
-          image: backend:{{TAG}}
+        - name: b-g-backend
+          image: b-g-backend:latest
           imagePullPolicy: Never
           ports:
             - containerPort: 8080
@@ -36,4 +36,4 @@ spec:
       targetPort: 8080
       nodePort: 30001
   selector:
-    app: backend
+    app: b-g-backend

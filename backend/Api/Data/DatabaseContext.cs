@@ -1,4 +1,4 @@
-﻿namespace webapp.Data;
+﻿namespace Api.Data;
 
 public class DatabaseContext
 {

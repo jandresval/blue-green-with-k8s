@@ -1,4 +1,4 @@
-﻿namespace webapp;
+﻿namespace Api;
 
 public class AppSettings
 {

@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontend
+  name: b-g-frontend
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: frontend
+      app: b-g-frontend
   template:
     metadata:
       labels:
-        app: frontend
+        app: b-g-frontend
     spec:
       containers:
-        - name: frontend
-          image: frontend:latest
+        - name: b-g-frontend
+          image: b-g-frontend:latest
           imagePullPolicy: Never
           ports:
             - containerPort: 3000
@@ -34,4 +34,4 @@ spec:
       targetPort: 3000
       nodePort: 30002
   selector:
-    app: frontend
+    app: b-g-frontend
