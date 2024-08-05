@@ -4,6 +4,7 @@
 
 1. **Run the Deployment Script:**
    - Automates the entire deployment process.
+
    ```
    .\deploy-app.sh
    ```
@@ -25,8 +26,8 @@
 
 ## Deployment Verification
 
-- **API Check:** Execute `curl http://localhost:30001/greeting` to verify the API.
-- **Application Access:** Open `http://localhost:30002` to access the full application. 
+- **API Check:** Open [http://localhost:30001/greeting](http://localhost:30001/greeting) to verify the API.
+- **Application Access:** Open [http://localhost:30002](http://localhost:30002) to access the full application. 
 
 ### Automated Deployment Teardown Script
 
@@ -109,9 +110,9 @@ For local connection instructions to MariaDB, see [./deployments/db-verification
 
 1. **Database Status Check:**
 
-```sh
-./check-db.sh
-```
+    ```sh
+    ./check-db.sh
+    ```
 
 ### Detailed Verification
 Follow these steps for a detailed verification process:
