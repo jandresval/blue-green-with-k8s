@@ -1,6 +1,7 @@
 #!/bin/bash
 
-CUSTOM_TAG="$1"
+SKIP_PAUSE="$1" # First Script Argument
+CUSTOM_TAG="$2" # Second Script Argument
 
 BE_IMAGE_NAME="b-g-backend"
 FE_IMAGE_NAME="b-g-frontend"
@@ -23,3 +24,7 @@ docker build -t "${FE_IMAGE_NAME}:${TAG}" -f ./frontend/Dockerfile ./frontend --
 # docker push "${REGISTRY_URL}/${FE_IMAGE_NAME}:${TAG}"
 
 echo "Build and tag completed."
+
+if [[ "$SKIP_PAUSE" != "true" ]]; then
+    read -rsp $'\nScript ended. Press any key to exit...'
+fi

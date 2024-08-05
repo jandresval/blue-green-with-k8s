@@ -9,7 +9,7 @@ fi
 RANDOMTAG=$(cat /dev/urandom | tr -dc 'a-z' | fold -w 8 | head -n 1)
 
 # Build images with the generated random tag
-./build-images.sh "$RANDOMTAG"
+./build-images.sh true "$RANDOMTAG"
 
 # Deploy the database
 kubectl apply -f ./deployments/local/db.yaml

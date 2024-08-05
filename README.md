@@ -1,130 +1,128 @@
-# blue-green-deployment
+# Blue-Green Deployment
 
-# Local Kubernetes Deployment
-# Step By Step Manual Deployment
-To deploy services in your local Kubernetes environment, execute the following steps from the project root:
+## Automated Deployment
 
-1. Apply the MariaDB Kubernetes configuration:
-    ```
-    kubectl apply -f ./deployments/local/db.yaml
-    ```
-
-2. Build and tag the Frontend and Backend Docker images:
-    ```
-    .\build-images.sh
-    ```
-    >Ensure that the output shows `Build and tag completed`.
-
-3. Deploy the backend:
-    ```
-    kubectl apply -f ./deployments/local/backend.yaml
-    ```
-
-4. Deploy the frontend:
-    ```
-    kubectl apply -f ./deployments/local/frontend.yaml
-    ```
-
-5. Verify the deployments:
-
-    ```
-    kubectl get deployments
-    ```
-    > You should see:
-    > - `b-g-backend    1/1     1`
-    > - `b-g-frontend   1/1     1`
-    > - `b-g-mariadb    1/1     1`
-
-## Local Kubernetes Deployment Verification
-Check the API deployment: `curl http://localhost:30001/greeting`  
-Access the full application: `http://localhost:30002`
-
-## Local Kubernetes Cleanup
-Run the following commands to dispose of created services: 
-
-1. Delete the MariaDB deployment:
-    ```
-    kubectl delete -f ./deployments/local/db.yaml
-    ```
-2. Delete the backend deployment:
-    ``` 
-    kubectl delete -f ./deployments/local/backend.yaml
-    ```
-3. Delete the frontend deployment:
-    ```
-    kubectl delete -f ./deployments/local/frontend.yaml
-    ```
-
-# Automated Script Deployment
-1. Run the deployment script:
+1. **Run the Deployment Script:**
+   - Automates the entire deployment process.
    ```
    .\deploy-app.sh
    ```
-   
-   This script performs the following steps:
-   > Builds `b-g-backend` and `b-g-frontend` Docker images with a random tag.  
-   > Deploys MariaDB.  
-   > Deploys the `b-g-backend` to Kubernetes with the random tag.  
-   > Deploys the `b-g-frontend` to Kubernetes with the random tag.  
-   > Displays the deployment status of all components.  
 
-    after deployment, You should see:
-    > - `b-g-backend    1/1     1`
-    > - `b-g-frontend   1/1     1`
-    > - `b-g-mariadb    1/1     1`
+   - Steps performed:
+     - Builds `b-g-backend` and `b-g-frontend` Docker images with a random tag.
+     - Deploys MariaDB.
+     - Deploys the `b-g-backend` to Kubernetes with the random tag.
+     - Deploys the `b-g-frontend` to Kubernetes with the random tag.
+     - Displays the deployment status of all components.
 
-## Local Kubernetes Deployment Verification
-Check the API deployment: `curl http://localhost:30001/greeting`  
-Access the full application: `http://localhost:30002`  
+   - After deployment, expect:
 
-# Undeploy all
-1. Clean up Kubernetes by running:
+        | NAME          | READY | UP-TO-DATE | AVAILABLE |
+        |---------------|-------|------------|-----------|
+        | b-g-backend   | 1/1   | 1          | 1         |
+        | b-g-frontend  | 1/1   | 1          | 1         |
+        | b-g-mariadb   | 1/1   | 1          | 1         |
+
+## Deployment Verification
+
+- **API Check:** Execute `curl http://localhost:30001/greeting` to verify the API.
+- **Application Access:** Open `http://localhost:30002` to access the full application. 
+
+### Automated Deployment Teardown Script
+
+1. **Delete deployments:**
     ```
     .\teardown-app.sh
     ```
 
-# K8s Terraform Deployment (DELETE)
-To deploy the infrastructure using Terraform, execute the following steps from the project root:
-1. `cd k8s-terraform`
-2. `terraform init`
-3. `terraform apply`
+## Manual Deployment
 
-## K8s Terraform Verification
-Run the following command to validate api deployment: `curl http://localhost`
+If you prefer step-by-step manual deployment, refer to the following section:
+
+### Step-By-Step Manual Deployment
+
+Follow these steps from your project root to deploy services locally:
+
+1. **Deploy the Database (MariaDB):**
+    - Applies the MariaDB configuration.
+
+    ```
+    kubectl apply -f ./deployments/local/db.yaml
+    ```
+
+2. **Build and Tag Images:**
+    - Builds and tags frontend and backend Docker images. Confirm with: "Build and tag completed." Also, ensure there are no errors, which will appear in RED.
+
+    ```
+    .\build-images.sh
+    ```
+
+3. **Deploy the Backend:**  
+
+    ```
+    kubectl apply -f ./deployments/local/backend.yaml
+    ```
+
+4. **Deploy the Frontend:**
+    ```
+    kubectl apply -f ./deployments/local/frontend.yaml
+    ```
+
+5. **Verify Deployments:**
+    - Checks deployment status. Expect all services to show as `1/1 READY`.
+
+    ```
+    kubectl get deployments
+    ```
+    
+    - You should see:
+
+        | NAME         | READY | UP-TO-DATE | AVAILABLE |
+        |--------------|-------|------------|-----------|
+        | b-g-backend  | 1/1   | 1          | 1         |
+        | b-g-frontend | 1/1   | 1          | 1         |
+        | b-g-mariadb  | 1/1   | 1          | 1         |
 
 ## Cleanup
-Run the following command to dispose of created services: `terraform destroy`
+To remove services, execute:
 
+1. **Delete the Database (MariaDB) deployment:**
+    ```
+    kubectl delete -f ./deployments/local/db.yaml
+    ```
+2. **Delete the Backend deployment:**
+    ``` 
+    kubectl delete -f ./deployments/local/backend.yaml
+    ```
+3. **Delete the Frontend deployment:**
+    ```
+    kubectl delete -f ./deployments/local/frontend.yaml
+    ```
 
-# Steps for MariaDB Deployment in Kubernetes
+# Database Connection
 
-## Deploy MariaDB
-```sh
-kubectl apply -f mariadb-deployment.yaml
-```
+## Local Connection Guide
 
-# Remove Deployment Resource
-```sh
-kubectl delete -f mariadb-deployment.yaml
-```
+For local connection instructions to MariaDB, see [./deployments/db-verification.sh](./deployments/db-verification.sh).
 
-## Local Database Connection
-For instructions on how to connect to the MariaDB database locally, please refer to the `check-db.sh` script. This script includes the necessary commands and steps for establishing a local connection.
+### Quick Verification
 
-## Verify Deployment (Easy Method)
-Run the provided script to check the database status:
+1. **Database Status Check:**
+
 ```sh
 ./check-db.sh
 ```
 
-## Verify Deployment (Detailed Method)
+### Detailed Verification
 Follow these steps for a detailed verification process:
 
-1. Check the pod status:
+1. **Check Pod Status:**
+
     ```sh
     kubectl get pods  # Wait until STATUS becomes Running otherwise investigate and troubleshoot.
     ```
-2. Access the MariaDB pod:
+2. **Access Pod:**
+    
     ```sh
     kubectl exec -it <REPLACE_WITH_POD_NAME> -- bash
     ```
@@ -132,10 +130,12 @@ Follow these steps for a detailed verification process:
     >Example: 
     >`kubectl exec -it mariadb-deployment-XXXXX -- bash`
 
-3. Try to connect to MariaDB: 
+3. **MySQL Connection:** 
+    
     ```
     mysql -u root -p
     ```
+    
     >If you receive an error similar to following: `/bin/sh: 1: mysql: not found`, install the MySQL client:
     >
     >```sh
@@ -149,14 +149,16 @@ Follow these steps for a detailed verification process:
     >mysql -u root -p
     >```
 
-4. Enter the password when prompted:
+4. **Password Prompt:**
+    
     ```
     Enter password: password
     ```
     
     >If the password fails, retry from step 3.
 
-5. Run SQL commands to test the connection:
+5. **Test Commands:**
+    
     ```sh
     SELECT NOW(); # Should return the current server timestamp
     ```
