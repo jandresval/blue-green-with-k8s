@@ -1,20 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: b-g-backend
+  name: b-g-backend-{{STATUS}}
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: b-g-backend
+      version: {{STATUS}}
   template:
     metadata:
       labels:
         app: b-g-backend
+        version: {{STATUS}}
     spec:
       containers:
         - name: b-g-backend
-          image: b-g-backend:{{TAG}}
+          image: b-g-backend:{{IMAGE_TAG}}
           imagePullPolicy: Never
           ports:
             - containerPort: 8080
@@ -28,12 +30,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: backend-service
+  name: backend-service-{{STATUS}}
 spec:
-  type: NodePort
+  selector:
+    app: b-g-backend
+    version: {{STATUS}}
   ports:
     - port: 8080
       targetPort: 8080
-      nodePort: 30001
-  selector:
-    app: b-g-backend
