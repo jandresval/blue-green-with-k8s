@@ -1,4 +1,3 @@
-# backend.yaml.template
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -8,12 +7,12 @@ spec:
   selector:
     matchLabels:
       app: b-g-backend
-      version: {{STATUS}}
+      status: {{STATUS}}
   template:
     metadata:
       labels:
         app: b-g-backend
-        version: {{STATUS}}
+        status: {{STATUS}}
     spec:
       containers:
         - name: b-g-backend
@@ -26,6 +25,7 @@ spec:
               value: "Development"
             - name: Database__ConnectionString
               value: "server=mariadb-service;port=3306;database=blue_green;user=root;password=password"
+
 ---
 apiVersion: v1
 kind: Service
@@ -35,7 +35,7 @@ spec:
   type: NodePort
   selector:
     app: b-g-backend
-    version: {{STATUS}}
+    status: {{STATUS}}
   ports:
     - port: 8080
       targetPort: 8080

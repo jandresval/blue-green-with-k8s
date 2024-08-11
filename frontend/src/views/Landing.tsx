@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
+import config from '../config';
 
 function Landing() {
     const [data, setData] = useState(String);
 
     useEffect(() => {
-        fetch(import.meta.env.VITE_API_URL_GREETING_ENDPOINT)
+        fetch(config.API_URL_GREETING_ENDPOINT)
             .then((response) => response.text())
             .then((text) => setData(
                 JSON.parse(text)
