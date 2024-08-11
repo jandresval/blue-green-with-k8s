@@ -13,7 +13,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: backend-service-stable
+                name: b-g-backend-service-stable
                 port:
                   number: 8080
     - host: beta.example.com
@@ -23,6 +23,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: backend-service-beta
+                name: b-g-backend-service-beta
                 port:
                   number: 8080
