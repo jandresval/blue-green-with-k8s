@@ -238,13 +238,6 @@ main() {
         status)
             show_status
             ;;
-        check-env)
-            if [ -z "$2" ] || [[ ! "$2" =~ ^(stable|beta)$ ]]; then
-                print_error "Usage: $0 check-env <stable|beta>"
-                show_exit_prompt
-            fi
-            check_env "$2"
-            ;;
         teardown)
             if [ "$#" -ne 2 ] || [[ ! "$2" =~ ^(all|beta)$ ]]; then
                 print_error "Usage: $0 teardown <all|beta>"
