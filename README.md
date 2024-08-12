@@ -1,42 +1,80 @@
 # Blue-Green Deployment
 
-## Automated Deployment
+The `deploy-manager.sh` script automates the blue-green deployment process for your Kubernetes application.
 
-1. **Run the Deployment Script:**
-   - Automates the entire deployment process.
+## Main Workflow
 
-   ```
-   .\deploy-app.sh
-   ```
+### 1. Deploy Stable Environment
 
-   - Steps performed:
-     - Builds `b-g-backend` and `b-g-frontend` Docker images with a random tag.
-     - Deploys MariaDB.
-     - Deploys the `b-g-backend` to Kubernetes with the random tag.
-     - Deploys the `b-g-frontend` to Kubernetes with the random tag.
-     - Displays the deployment status of all components.
+```
+./deploy-manager.sh deploy stable
+```
 
-   - After deployment, expect:
+This command:
+- Builds Docker images with a random tag
+- Deploys the MariaDB database
+- Deploys the backend and frontend to Kubernetes in the stable environment
 
-        | NAME          | READY | UP-TO-DATE | AVAILABLE |
-        |---------------|-------|------------|-----------|
-        | b-g-backend   | 1/1   | 1          | 1         |
-        | b-g-frontend  | 1/1   | 1          | 1         |
-        | b-g-mariadb   | 1/1   | 1          | 1         |
+### 2. Deploy Beta Environment
+
+```
+./deploy-manager.sh deploy beta
+```
+
+Similar to deploying stable, but creates a separate beta environment.
+
+### 3. Promote Beta to Stable
+
+```
+./deploy-manager.sh promote
+```
+
+Promotes the current beta deployment to stable.
+
+### 4. Teardown Resources
+
+```
+./deploy-manager.sh teardown all
+```
+
+Removes all deployed resources (use `beta` instead of `all` to remove only beta resources).
 
 ## Deployment Verification
 
-- **API Check:** Open [http://localhost:30001/greeting](http://localhost:30001/greeting) to verify the API.
-- **Application Access:** Open [http://localhost:30002](http://localhost:30002) to access the full application. 
+- **API Check:** Open `http://localhost:<backend-port>/greeting` to verify the API.
+- **Application Access:** Open `http://localhost:<frontend-port>` to access the full application.
 
-### Automated Deployment Teardown Script
+Note: The actual ports will be displayed in the script output after deployment.
 
-1. **Delete deployments:**
-    ```
-    .\teardown-app.sh
-    ```
+## Additional Features and Commands
 
-## Manual Deployment
+- **Deploy Database Only:**
+  ```
+  ./deploy-manager.sh deploy-db
+  ```
+  Deploys only the MariaDB database.
+
+- **Check Deployment Status:**
+  ```
+  ./deploy-manager.sh status
+  ```
+  Displays current status of all deployments, services, and access URLs.
+
+- **Color-coded output** for easy reading and error identification.
+- **Detailed error messages** and deployment information for troubleshooting.
+- **Automatic image tagging** for version control.
+- **Environment variable inspection** for both stable and beta deployments (performed during deployment).
+
+## Deployment Process Details
+
+The deployment process includes:
+- Building backend and frontend Docker images with a random tag.
+- Deploying the MariaDB database.
+- Deploying the backend to Kubernetes with the generated tag.
+- Deploying the frontend to Kubernetes with the generated tag.
+- Displaying the deployment status of all components.
+
+## Manual Deployment and Management
 
 If you prefer step-by-step manual deployment, refer to the following section:
 
