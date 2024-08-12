@@ -120,14 +120,20 @@ check_env() {
 
 # Function to teardown all resources
 teardown() {
-    echo -e "${YELLOW}Tearing down all resources...${NC}"
+    local scope=$1
     
-    kubectl delete deployment -l app=b-g
-    kubectl delete service -l app=b-g
-    kubectl delete configmap -l app=b-g
-    kubectl delete pvc -l app=b-g
-    
-    echo -e "${GREEN}Teardown complete.${NC}"
+    if [ "$scope" == "all" ]; then
+        echo -e "${YELLOW}Tearing down all resources...${NC}"
+        kubectl delete deployment,service,configmap,pvc -l app=b-g
+        echo -e "${GREEN}All resources teardown complete.${NC}"
+    elif [ "$scope" == "beta" ]; then
+        echo -e "${YELLOW}Tearing down beta resources...${NC}"
+        kubectl delete deployment,service,configmap -l app=b-g,status=beta
+        echo -e "${GREEN}Beta resources teardown complete.${NC}"
+    else
+        echo -e "${RED}Invalid teardown scope. Use 'all' or 'beta'.${NC}"
+        exit 1
+    fi
 }
 
 # Function to build images
@@ -186,10 +192,14 @@ case "$1" in
         check_env "$2"
         ;;
     teardown)
-        teardown
+        if [ "$#" -ne 2 ] || [[ ! "$2" =~ ^(all|beta)$ ]]; then
+            echo -e "${YELLOW}Usage: $0 teardown <all|beta>${NC}"
+            exit 1
+        fi
+        teardown "$2"
         ;;
     *)
-        echo -e "${YELLOW}Usage: $0 {deploy-db|deploy <stable|beta>|promote|status|check-env <stable|beta>|teardown}${NC}"
+        echo -e "${YELLOW}Usage: $0 {deploy-db|deploy <stable|beta>|promote|status|check-env <stable|beta>|teardown <all|beta>}${NC}"
         exit 1
         ;;
 esac
