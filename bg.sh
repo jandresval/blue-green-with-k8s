@@ -1,37 +1,92 @@
 #!/bin/bash
 
+# ==============================
 # Constants
-DB_DEPLOYMENT="./deployments/local/db.yaml"
-BACKEND_TEMPLATE="./deployments/local/backend.yaml.template"
-FRONTEND_TEMPLATE="./deployments/local/frontend.yaml.template"
-BUILD_SCRIPT="./build-images.sh"
+# ==============================
+readonly DB_DEPLOYMENT="./deployments/local/db.yaml"
+readonly BACKEND_TEMPLATE="./deployments/local/backend.yaml.template"
+readonly FRONTEND_TEMPLATE="./deployments/local/frontend.yaml.template"
+readonly BUILD_SCRIPT="./build-images.sh"
 
+# ==============================
 # Color codes for output
-BLUE='\033[0;34m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-CYAN='\033[0;36m'
-NC='\033[0m' # No Color
+# ==============================
+readonly BLUE='\033[0;34m'
+readonly GREEN='\033[0;32m'
+readonly YELLOW='\033[1;33m'
+readonly CYAN='\033[0;36m'
+readonly RED='\033[0;31m'
+readonly NC='\033[0m' # No Color
+
+# ==============================
+# Logging Functions
+# ==============================
+
+# Function to print colored output with improved spacing
+print_colored() {
+    local color=$1
+    local message=$2
+    local prefix=$3
+    echo -e "\n${color}${prefix}${message}${NC}"
+}
+
+# Function to print a header
+print_header() {
+    local message=$1
+    echo -e "\n${BLUE}==============================${NC}"
+    echo -e "${BLUE}  ${message}${NC}"
+    echo -e "${BLUE}==============================${NC}"
+}
+
+# Function to print a sub-header
+print_subheader() {
+    local message=$1
+    echo -e "\n${CYAN}--- ${message} ---${NC}"
+}
+
+# Function to print a success message
+print_success() {
+    print_colored "$GREEN" "$1" "✔ "
+}
+
+# Function to print a warning message
+print_warning() {
+    print_colored "$YELLOW" "$1" "⚠ "
+}
+
+# Function to print an error message
+print_error() {
+    print_colored "$RED" "$1" "✖ "
+}
+
+# Function to print an info message
+print_info() {
+    print_colored "$BLUE" "$1" "ℹ "
+}
+
+# ==============================
+# Utility Functions
+# ==============================
 
 # Function to generate a random tag
 generate_random_tag() {
-    echo $(cat /dev/urandom | tr -dc 'a-z' | fold -w 8 | head -n 1)
+    cat /dev/urandom | tr -dc 'a-z' | fold -w 8 | head -n 1
 }
+
+# ==============================
+# Deployment Functions
+# ==============================
 
 # Function to deploy database
 deploy_db() {
-    echo -e "${BLUE}Deploying Database...${NC}"
+    print_header "Deploying Database"
     kubectl apply -f "$DB_DEPLOYMENT"
 
-    echo -e "${YELLOW}Waiting for Database to be fully ready...${NC}"
-    kubectl wait --for=condition=ready --timeout=60s pod -l app=b-g,component=mariadb
-
-    DB_STATUS=$(kubectl get pods -l app=b-g,component=mariadb -o jsonpath='{.items[0].status.containerStatuses[0].ready}')
-
-    if [ "$DB_STATUS" == "true" ]; then
-        echo -e "${GREEN}Database is ready!${NC}"
+    print_info "Waiting for Database to be fully ready..."
+    if kubectl wait --for=condition=ready --timeout=60s pod -l app=b-g,component=mariadb; then
+        print_success "Database is ready!"
     else
-        echo -e "${RED}Database is not ready. Please check the deployment.${NC}"
+        print_error "Database is not ready. Please check the deployment."
         read -n 1 -s -r
     fi
 }
@@ -41,118 +96,110 @@ deploy() {
     local status=$1
     local image_tag=$2
     
+    print_header "Deploying $status Environment"
+
     # Deploy backend
-    echo -e "${BLUE}Deploying $status backend...${NC}"
+    print_subheader "Deploying $status backend"
     sed -e "s/{{STATUS}}/$status/g" -e "s/{{IMAGE_TAG}}/$image_tag/g" "$BACKEND_TEMPLATE" | kubectl apply -f -
     
-    echo -e "${YELLOW}Waiting for $status backend deployment to be available...${NC}"
+    print_info "Waiting for $status backend deployment to be available..."
     if ! kubectl wait --for=condition=available --timeout=60s deployment/b-g-backend-$status; then
-        echo -e "${RED}Backend deployment failed. Check the logs for more information.${NC}"
+        print_error "Backend deployment failed. Check the logs for more information."
         kubectl get pods -l app=b-g,component=backend,status=$status
         kubectl describe deployment b-g-backend-$status
-        exit 1
+        show_exit_prompt
     fi
 
-    echo -e "${YELLOW}Waiting for $status backend service to be created...${NC}"
-    for i in {1..30}; do
-        if kubectl get service b-g-backend-service-$status &> /dev/null; then
-            echo -e "${GREEN}Backend service created successfully.${NC}"
-            break
-        fi
-        if [ $i -eq 30 ]; then
-            echo -e "${RED}Backend service creation failed. Check the configuration.${NC}"
-            kubectl describe service b-g-backend-service-$status
-            exit 1
-        fi
-        sleep 1
-    done
+    local service_name="b-g-backend-service-$status"
+    print_info "Checking if $status backend service exists..."
+    if kubectl get service "$service_name" &> /dev/null; then
+        print_success "$status backend service exists."
+    else
+        print_error "Backend service $service_name does not exist. Check the configuration."
+        wait_for_user
+        return 1
+    fi
 
     # Get the NodePort of the backend service
-    local backend_node_port=$(kubectl get service b-g-backend-service-$status -o jsonpath='{.spec.ports[0].nodePort}')
+    local backend_node_port=$(kubectl get service "$service_name" -o jsonpath='{.spec.ports[0].nodePort}')
     
     # Deploy frontend
-    echo -e "${BLUE}Deploying $status frontend...${NC}"
+    print_subheader "Deploying $status frontend"
     sed -e "s/{{STATUS}}/$status/g" -e "s/{{IMAGE_TAG}}/$image_tag/g" -e "s/{{BACKEND_NODE_PORT}}/$backend_node_port/g" "$FRONTEND_TEMPLATE" | kubectl apply -f -
     
-    echo -e "${YELLOW}Waiting for $status frontend deployment to be available...${NC}"
+    print_info "Waiting for $status frontend deployment to be available..."
     if ! kubectl wait --for=condition=available --timeout=60s deployment/b-g-frontend-$status; then
-        echo -e "${RED}Frontend deployment failed. Check the logs for more information.${NC}"
+        print_error "Frontend deployment failed. Check the logs for more information."
         kubectl get pods -l app=b-g,component=frontend,status=$status
         kubectl describe deployment b-g-frontend-$status
-        exit 1
+        show_exit_prompt
     fi
     
-    echo -e "${GREEN}$status deployment updated with image tag: $image_tag${NC}"
-    echo -e "${CYAN}Frontend configured to use backend at http://localhost:$backend_node_port${NC}"
+    print_success "$status deployment updated with image tag: $image_tag"
+    print_info "Frontend configured to use backend at http://localhost:$backend_node_port"
 }
 
 # Function to show current status and provide access URLs
 show_status() {
-    echo -e "\n${BLUE}===== Current Deployment Status =====${NC}"
+    print_header "Current Deployment Status"
     kubectl get deployments
 
-    echo -e "\n${BLUE}Current Services:${NC}"
+    print_subheader "Current Services"
     kubectl get services
 
-    echo -e "\n${GREEN}Access URLs:${NC}"
+    print_subheader "Access URLs"
     
     local services=("b-g-backend-service-stable" "b-g-backend-service-beta" "b-g-frontend-service-stable" "b-g-frontend-service-beta" "mariadb-service")
     local names=("Stable Backend" "Beta Backend" "Stable Frontend" "Beta Frontend" "MariaDB")
     
     for i in "${!services[@]}"; do
         local port=$(kubectl get service ${services[$i]} -o jsonpath='{.spec.ports[0].nodePort}' 2>/dev/null)
-        if [ ! -z "$port" ]; then
-            echo -e "${CYAN}${names[$i]}: http://localhost:$port${NC}"
+        if [ -n "$port" ]; then
+            print_info "${names[$i]}: http://localhost:$port"
         fi
     done
 }
 
-# Function to check environment variables
 check_env() {
     local status=$1
-    echo -e "${BLUE}Checking environment variables for $status deployment${NC}"
+    print_header "Checking environment variables for $status deployment"
     
     for deployment in "backend" "frontend"; do
-        echo -e "${CYAN}$deployment environment:${NC}"
+        print_subheader "$deployment environment"
         kubectl exec deploy/b-g-$deployment-$status -- printenv | grep -E 'ASPNETCORE_ENVIRONMENT|Database__ConnectionString|API_URL_GREETING_ENDPOINT'
     done
 }
 
-# Function to teardown all resources
-teardown() {
+teardown_resources() {
     local scope=$1
     
     if [ "$scope" == "all" ]; then
-        echo -e "${YELLOW}Tearing down all resources...${NC}"
+        print_header "Tearing down all resources"
         kubectl delete deployment,service,configmap,pvc -l app=b-g
-        echo -e "${GREEN}All resources teardown complete.${NC}"
+        print_success "All resources teardown complete."
     elif [ "$scope" == "beta" ]; then
-        echo -e "${YELLOW}Tearing down beta resources...${NC}"
+        print_header "Tearing down beta resources"
         kubectl delete deployment,service,configmap -l app=b-g,status=beta
-        echo -e "${GREEN}Beta resources teardown complete.${NC}"
+        print_success "Beta resources teardown complete."
     else
-        echo -e "${RED}Invalid teardown scope. Use 'all' or 'beta'.${NC}"
-        exit 1
+        print_error "Invalid teardown scope. Use 'all' or 'beta'."
+        show_exit_prompt
     fi
 }
 
-# Function to build images
 build_images() {
     local tag=$1
     
-    # Ensure the build script is executable
     if [[ ! -x "$BUILD_SCRIPT" ]]; then
         chmod +x "$BUILD_SCRIPT"
     fi
 
-    echo -e "${BLUE}Building images with tag: $tag${NC}"
-
+    print_header "Building Images"
+    print_info "Building images with tag: $tag"
     "$BUILD_SCRIPT" true "$tag"
-
-    echo -e "${GREEN}Images successful build with tag: $tag${NC}"
+    print_success "Images successfully built with tag: $tag"
 }
 
-# Function to handle deployment
 handle_deployment() {
     local deployment_type=$1
     local tag=$(generate_random_tag)
@@ -163,51 +210,60 @@ handle_deployment() {
     check_env "$deployment_type"
 }
 
-# Main script logic
-case "$1" in
-    deploy-db)
-        deploy_db
-        ;;
-    deploy)
-        if [ "$#" -ne 2 ] || [[ ! "$2" =~ ^(stable|beta)$ ]]; then
-            echo -e "${YELLOW}Usage: $0 deploy <stable|beta>${NC}"
-            exit 1
-        fi
-        handle_deployment "$2"
-        ;;
-    promote)
-        beta_image=$(kubectl get deployment b-g-backend-beta -o jsonpath='{.spec.template.spec.containers[0].image}')
-        deploy "stable" "${beta_image##*:}" # Extract tag from image
-        echo -e "${GREEN}Beta promoted to stable. New stable image tag: ${beta_image##*:}${NC}"
-        check_env "stable"
-        ;;
-    status)
+show_exit_prompt() {
+    print_info "Press any key to exit..."
+    read -n 1 -s -r
+    exit 1
+}
+
+main() {
+    case "$1" in
+        deploy-db)
+            deploy_db
+            ;;
+        deploy)
+            if [ "$#" -ne 2 ] || [[ ! "$2" =~ ^(stable|beta)$ ]]; then
+                print_error "Usage: $0 deploy <stable|beta>"
+                show_exit_prompt
+            fi
+            handle_deployment "$2"
+            ;;
+        promote)
+            print_header "Promoting Beta to Stable"
+            beta_image=$(kubectl get deployment b-g-backend-beta -o jsonpath='{.spec.template.spec.containers[0].image}')
+            deploy "stable" "${beta_image##*:}" # Extract tag from image
+            print_success "Beta promoted to stable. New stable image tag: ${beta_image##*:}"
+            check_env "stable"
+            ;;
+        status)
+            show_status
+            ;;
+        check-env)
+            if [ -z "$2" ] || [[ ! "$2" =~ ^(stable|beta)$ ]]; then
+                print_error "Usage: $0 check-env <stable|beta>"
+                show_exit_prompt
+            fi
+            check_env "$2"
+            ;;
+        teardown)
+            if [ "$#" -ne 2 ] || [[ ! "$2" =~ ^(all|beta)$ ]]; then
+                print_error "Usage: $0 teardown <all|beta>"
+                show_exit_prompt
+            fi
+            teardown_resources "$2"
+            ;;
+        *)
+            print_error "Usage: $0 {deploy-db|deploy <stable|beta>|promote|status|check-env <stable|beta>|teardown <all|beta>}"
+            show_exit_prompt
+            ;;
+    esac
+
+    if [[ "$1" != "teardown" && "$1" != "check-env" && "$1" != "status" ]]; then
         show_status
-        ;;
-    check-env)
-        if [ -z "$2" ] || [[ ! "$2" =~ ^(stable|beta)$ ]]; then
-            echo -e "${YELLOW}Usage: $0 check-env <stable|beta>${NC}"
-            exit 1
-        fi
-        check_env "$2"
-        ;;
-    teardown)
-        if [ "$#" -ne 2 ] || [[ ! "$2" =~ ^(all|beta)$ ]]; then
-            echo -e "${YELLOW}Usage: $0 teardown <all|beta>${NC}"
-            exit 1
-        fi
-        teardown "$2"
-        ;;
-    *)
-        echo -e "${YELLOW}Usage: $0 {deploy-db|deploy <stable|beta>|promote|status|check-env <stable|beta>|teardown <all|beta>}${NC}"
-        exit 1
-        ;;
-esac
+    fi
 
-if [[ "$1" != "teardown" && "$1" != "check-env" ]]; then
-    show_status
-fi
+    print_header "Deployment Script Completed"
+    show_exit_prompt
+}
 
-echo -e "\n${YELLOW}Deployment Script completed.${NC}"
-echo -e "${CYAN}Press any key to exit...${NC}"
-read -n 1 -s -r
+main "$@"
