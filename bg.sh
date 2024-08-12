@@ -23,15 +23,16 @@ deploy_db() {
     echo -e "${BLUE}Deploying Database...${NC}"
     kubectl apply -f "$DB_DEPLOYMENT"
 
-    echo -e "${YELLOW}Waiting for Database to be created...${NC}"
-    kubectl wait -for=condition=ready --timeout=60s deployment/b-g-mariadb
+    echo -e "${YELLOW}Waiting for Database to be fully ready...${NC}"
+    kubectl wait --for=condition=ready --timeout=60s pod -l app=b-g,component=mariadb
 
-    DB_STATUS=$(kubectl get pods -l app=b-g-mariadb -o jsonpath='{.items[0].status.containerStatuses[0].ready}')
+    DB_STATUS=$(kubectl get pods -l app=b-g,component=mariadb -o jsonpath='{.items[0].status.containerStatuses[0].ready}')
+
     if [ "$DB_STATUS" == "true" ]; then
         echo -e "${GREEN}Database is ready!${NC}"
     else
         echo -e "${RED}Database is not ready. Please check the deployment.${NC}"
-        exit 1
+        read -n 1 -s -r
     fi
 }
 
@@ -45,7 +46,7 @@ deploy() {
     sed -e "s/{{STATUS}}/$status/g" -e "s/{{IMAGE_TAG}}/$image_tag/g" "$BACKEND_TEMPLATE" | kubectl apply -f -
     
     echo -e "${YELLOW}Waiting for $status backend service to be created...${NC}"
-    kubectl wait --for=condition=available --timeout=60s deployment/b-g-backend-$status
+    kubectl wait --for=condition=ready --timeout=60s deployment/b-g-backend-$status
 
     # Get the NodePort of the backend service
     local backend_node_port=$(kubectl get service b-g-backend-service-$status -o jsonpath='{.spec.ports[0].nodePort}')
@@ -95,11 +96,9 @@ teardown() {
     echo -e "${YELLOW}Tearing down all resources...${NC}"
     
     kubectl delete deployment -l app=b-g
-
     kubectl delete service -l app=b-g
-
-    kubectl delete configmap mariadb-init
-    kubectl delete pvc mariadb-pv-claim
+    kubectl delete configmap -l app=b-g
+    kubectl delete pvc -l app=b-g
     
     echo -e "${GREEN}Teardown complete.${NC}"
 }
@@ -114,7 +113,10 @@ build_images() {
     fi
 
     echo -e "${BLUE}Building images with tag: $tag${NC}"
+
     "$BUILD_SCRIPT" true "$tag"
+
+    echo -e "${GREEN}Images successful build with tag: $tag${NC}"
 }
 
 # Function to handle deployment
