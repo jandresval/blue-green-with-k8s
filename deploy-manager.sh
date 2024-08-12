@@ -22,7 +22,6 @@ readonly NC='\033[0m' # No Color
 # Logging Functions
 # ==============================
 
-# Function to print colored output with improved spacing
 print_colored() {
     local color=$1
     local message=$2
@@ -30,7 +29,6 @@ print_colored() {
     echo -e "\n${color}${prefix}${message}${NC}"
 }
 
-# Function to print a header
 print_header() {
     local message=$1
     echo -e "\n${BLUE}==============================${NC}"
@@ -38,28 +36,23 @@ print_header() {
     echo -e "${BLUE}==============================${NC}"
 }
 
-# Function to print a sub-header
 print_subheader() {
     local message=$1
     echo -e "\n${CYAN}--- ${message} ---${NC}"
 }
 
-# Function to print a success message
 print_success() {
     print_colored "$GREEN" "$1" "✔ "
 }
 
-# Function to print a warning message
 print_warning() {
     print_colored "$YELLOW" "$1" "⚠ "
 }
 
-# Function to print an error message
 print_error() {
     print_colored "$RED" "$1" "✖ "
 }
 
-# Function to print an info message
 print_info() {
     print_colored "$BLUE" "$1" "ℹ "
 }
@@ -68,7 +61,6 @@ print_info() {
 # Utility Functions
 # ==============================
 
-# Function to generate a random tag
 generate_random_tag() {
     cat /dev/urandom | tr -dc 'a-z' | fold -w 8 | head -n 1
 }
@@ -77,36 +69,38 @@ generate_random_tag() {
 # Deployment Functions
 # ==============================
 
-# Function to deploy database
 deploy_db() {
     print_header "Deploying Database"
     kubectl apply -f "$DB_DEPLOYMENT"
 
     print_info "Waiting for Database to be fully ready..."
+    
     if kubectl wait --for=condition=ready --timeout=60s pod -l app=b-g,component=mariadb; then
         print_success "Database is ready!"
     else
         print_error "Database is not ready. Please check the deployment."
-        read -n 1 -s -r
+        show_exit_prompt
     fi
 }
 
-# Function to deploy or update
 deploy() {
     local status=$1
     local image_tag=$2
     
     print_header "Deploying $status Environment"
 
-    # Deploy backend
     print_subheader "Deploying $status backend"
     sed -e "s/{{STATUS}}/$status/g" -e "s/{{IMAGE_TAG}}/$image_tag/g" "$BACKEND_TEMPLATE" | kubectl apply -f -
     
     print_info "Waiting for $status backend deployment to be available..."
+
     if ! kubectl wait --for=condition=available --timeout=60s deployment/b-g-backend-$status; then
         print_error "Backend deployment failed. Check the logs for more information."
+        
         kubectl get pods -l app=b-g,component=backend,status=$status
+        
         kubectl describe deployment b-g-backend-$status
+        
         show_exit_prompt
     fi
 
@@ -120,10 +114,8 @@ deploy() {
         return 1
     fi
 
-    # Get the NodePort of the backend service
     local backend_node_port=$(kubectl get service "$service_name" -o jsonpath='{.spec.ports[0].nodePort}')
-    
-    # Deploy frontend
+
     print_subheader "Deploying $status frontend"
     sed -e "s/{{STATUS}}/$status/g" -e "s/{{IMAGE_TAG}}/$image_tag/g" -e "s/{{BACKEND_NODE_PORT}}/$backend_node_port/g" "$FRONTEND_TEMPLATE" | kubectl apply -f -
     
@@ -139,7 +131,6 @@ deploy() {
     print_info "Frontend configured to use backend at http://localhost:$backend_node_port"
 }
 
-# Function to show current status and provide access URLs
 show_status() {
     print_header "Current Deployment Status"
     kubectl get deployments
