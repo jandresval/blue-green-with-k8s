@@ -45,8 +45,27 @@ deploy() {
     echo -e "${BLUE}Deploying $status backend...${NC}"
     sed -e "s/{{STATUS}}/$status/g" -e "s/{{IMAGE_TAG}}/$image_tag/g" "$BACKEND_TEMPLATE" | kubectl apply -f -
     
+    echo -e "${YELLOW}Waiting for $status backend deployment to be available...${NC}"
+    if ! kubectl wait --for=condition=available --timeout=60s deployment/b-g-backend-$status; then
+        echo -e "${RED}Backend deployment failed. Check the logs for more information.${NC}"
+        kubectl get pods -l app=b-g,component=backend,status=$status
+        kubectl describe deployment b-g-backend-$status
+        exit 1
+    fi
+
     echo -e "${YELLOW}Waiting for $status backend service to be created...${NC}"
-    kubectl wait --for=condition=ready --timeout=60s deployment/b-g-backend-$status
+    for i in {1..30}; do
+        if kubectl get service b-g-backend-service-$status &> /dev/null; then
+            echo -e "${GREEN}Backend service created successfully.${NC}"
+            break
+        fi
+        if [ $i -eq 30 ]; then
+            echo -e "${RED}Backend service creation failed. Check the configuration.${NC}"
+            kubectl describe service b-g-backend-service-$status
+            exit 1
+        fi
+        sleep 1
+    done
 
     # Get the NodePort of the backend service
     local backend_node_port=$(kubectl get service b-g-backend-service-$status -o jsonpath='{.spec.ports[0].nodePort}')
@@ -54,6 +73,14 @@ deploy() {
     # Deploy frontend
     echo -e "${BLUE}Deploying $status frontend...${NC}"
     sed -e "s/{{STATUS}}/$status/g" -e "s/{{IMAGE_TAG}}/$image_tag/g" -e "s/{{BACKEND_NODE_PORT}}/$backend_node_port/g" "$FRONTEND_TEMPLATE" | kubectl apply -f -
+    
+    echo -e "${YELLOW}Waiting for $status frontend deployment to be available...${NC}"
+    if ! kubectl wait --for=condition=available --timeout=60s deployment/b-g-frontend-$status; then
+        echo -e "${RED}Frontend deployment failed. Check the logs for more information.${NC}"
+        kubectl get pods -l app=b-g,component=frontend,status=$status
+        kubectl describe deployment b-g-frontend-$status
+        exit 1
+    fi
     
     echo -e "${GREEN}$status deployment updated with image tag: $image_tag${NC}"
     echo -e "${CYAN}Frontend configured to use backend at http://localhost:$backend_node_port${NC}"
