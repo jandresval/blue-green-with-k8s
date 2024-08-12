@@ -24,7 +24,15 @@ deploy_db() {
     kubectl apply -f "$DB_DEPLOYMENT"
 
     echo -e "${YELLOW}Waiting for Database to be created...${NC}"
-    kubectl wait --for=condition=available --timeout=60s deployment/b-g-mariadb
+    kubectl wait -for=condition=ready --timeout=60s deployment/b-g-mariadb
+
+    DB_STATUS=$(kubectl get pods -l app=b-g-mariadb -o jsonpath='{.items[0].status.containerStatuses[0].ready}')
+    if [ "$DB_STATUS" == "true" ]; then
+        echo -e "${GREEN}Database is ready!${NC}"
+    else
+        echo -e "${RED}Database is not ready. Please check the deployment.${NC}"
+        exit 1
+    fi
 }
 
 # Function to deploy or update
@@ -85,10 +93,14 @@ check_env() {
 # Function to teardown all resources
 teardown() {
     echo -e "${YELLOW}Tearing down all resources...${NC}"
+    
     kubectl delete deployment -l app=b-g
+
     kubectl delete service -l app=b-g
+
     kubectl delete configmap mariadb-init
     kubectl delete pvc mariadb-pv-claim
+    
     echo -e "${GREEN}Teardown complete.${NC}"
 }
 
