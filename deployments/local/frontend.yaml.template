@@ -9,7 +9,7 @@ metadata:
 data:
   config.js: |
     window.RUNTIME_CONFIG = {
-      API_URL_GREETING_ENDPOINT: "http://localhost:{{BACKEND_NODE_PORT}}/greeting",
+      API_URL: "http://localhost:{{BACKEND_NODE_PORT}}",
     };
 
 ---
