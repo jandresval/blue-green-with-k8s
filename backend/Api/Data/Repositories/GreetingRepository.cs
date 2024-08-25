@@ -5,8 +5,6 @@ public class GreetingRepository
     DatabaseContext databaseContext
 )
 {
-    private MySqlConnection Connection { get; } = databaseContext.Connection;
-
     private string _greeting = string.Empty;
 
     private const string GetFirstGreetingRecord = "SELECT greeting FROM greetings LIMIT 1;";
@@ -15,7 +13,9 @@ public class GreetingRepository
     {
         if (_greeting != string.Empty) return _greeting;
 
-        using var cmd = new MySqlCommand(GetFirstGreetingRecord, Connection);
+        using var connection = databaseContext.CreateConnection();
+
+        using var cmd = new MySqlCommand(GetFirstGreetingRecord, connection);
 
         using var reader = cmd.ExecuteReader();
 

@@ -28,7 +28,9 @@ builder.Services.AddCors(options =>
 );
 
 builder.Services.AddSingleton<DatabaseContext>(_ => new DatabaseContext(appSettings!));
+
 builder.Services.AddScoped<GreetingRepository>();
+builder.Services.AddScoped<FarewellRepository>();
 
 var app = builder.Build();
 
@@ -36,6 +38,10 @@ app.UseCors(myAllowSpecificOrigins);
 
 app.MapGet("/greeting", (GreetingRepository greetingRepository) =>
     Results.Json(greetingRepository.GetGreeting())
+).RequireCors(myAllowSpecificOrigins);
+
+app.MapGet("/farewell", (FarewellRepository farewellRepository) =>
+    Results.Json(farewellRepository.GetFarewell())
 ).RequireCors(myAllowSpecificOrigins);
 
 app.MapGet("/", () =>  Results.Json("Hello World!"));

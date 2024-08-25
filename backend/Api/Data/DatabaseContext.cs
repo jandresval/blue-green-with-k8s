@@ -1,12 +1,16 @@
 ﻿namespace Api.Data;
 
 public class DatabaseContext
+(
+    AppSettings appSettings
+)
 {
-    public MySqlConnection Connection { get; }
+    private readonly string _connectionString = appSettings.Database.ConnectionString;
 
-    public DatabaseContext(AppSettings appSettings)
+    public MySqlConnection CreateConnection()
     {
-        Connection = new MySqlConnection(appSettings.Database.ConnectionString);
-        Connection.Open();
+        var connection = new MySqlConnection(_connectionString);
+        connection.Open();
+        return connection;
     }
 }
