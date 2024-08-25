@@ -5,7 +5,7 @@ function Landing() {
     const [data, setData] = useState(String);
 
     useEffect(() => {
-        fetch(config.API_URL_GREETING_ENDPOINT)
+        fetch(config.API_URL + '/greeting')
             .then((response) => response.text())
             .then((text) => setData(
                 JSON.parse(text)
