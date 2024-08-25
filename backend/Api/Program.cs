@@ -28,6 +28,7 @@ builder.Services.AddCors(options =>
 );
 
 builder.Services.AddSingleton<DatabaseContext>(_ => new DatabaseContext(appSettings!));
+
 builder.Services.AddScoped<GreetingRepository>();
 
 var app = builder.Build();
